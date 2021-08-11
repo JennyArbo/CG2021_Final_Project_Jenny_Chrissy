@@ -6,6 +6,10 @@
 
 # Executive Summary
 
+## Link to Presentation Slides
+
+https://docs.google.com/presentation/d/1kMpPd5t5jq3JrvQm0gzWucCUQS5Ag9N3TZzwUHdlESQ/edit?usp=sharing 
+
 ## Background
 
 An agency of the Department of the Interior, the US National Park Service has a history dating back to 1872, when President Grant signed an act on March 1st establishing Yellowstone as the country's first national park.  Captivated by nature since childhood, Theodore Roosevelt led several conservation initiatives during his presidency, including the 1906 Antiquities Act.  Congress offered its support in 1916 by passing the so-called Organic Act, which officially established the National Park Service.  Other significant landmarks in the NPS chronology include the Endangered Species Act of 1973, which is perhaps the best-known in a series of 1960s/70s environmental legislation that elevated the importance of research and scientific study in the national parks.
