@@ -27,6 +27,7 @@ The preservation of natural spaces and their ecosystems should not only concern 
 As mentioned in the previous section, it is thought that the majority of flora and fauna residing within park boundaries remain undiscovered, meaning our dataset is by default a sample of the actual natural population of the park system.  We discovered some additional gaps in the Kaggle dataset:
 - There are currently 63 national parks in the NPS system; the dataset includes entries for 56 parks.
 - National parks are found in 30 states and 2 US territories; the dataset has entries for 27 states and no territories.
+- Certain fields in the species dataframe, such as "Conservation Status," did not have values for a majority of entries.  According to documentation on the NPS website, this "unassigned" designation is permitted for the "Conservation Status" field "if the park species record status is draft, in review, or inactive."  This incompleteness of some fields (and lack of clarity regarding why a value is missing in a given field) informed our decisions when preprocessing the data and performing feature selection for modeling.
 - The Kaggle description includes the following: "All park species records are available to the public on the National Park Species portal; exceptions are made for sensitive, threatened, or endangered species when widespread distribution of information could pose a risk to the species in the park."  As no aggregate figures are provided (ex. a numerical count of all known species, including those whose full entries are omitted from the public-facing database), this inserts another wrinkle into how useful models built on this dataset would be.
 - Our map displaying the sizes and locations of the parks represented in the dataset clearly shows that the parks are clustered on the western half of the United States, with Alaska and California leading the pack in both acreage and number of parks.  While there are certainly unique biomes and organisms in the western portion of the country that deserve attention and protection, this lopsided aspect of the dataset gives one pause as to how much models derived from it would be relevant to conservation decisions in the eastern portion of the United States.
 - The National Park Service is but one of the government entities that work to preserve our natural riches for future generations.  For instance, the US Forest Service maintains more than 192 million acres of protected land than includes grasslands and environmental research areas in addition to forests.  There is certainly overlap between the national parks and forests, but comprehensive data collection, modeling, and conservation efforts should also include regionally maintained nature preserves, such as state parks, which fall outside the scope of the dataset and our project.
@@ -41,3 +42,79 @@ Multiple preprocessing approaches and techniques were utilized to clean and prep
 - StandardScaler was utilized to scale the dataset prior to modeling.
 - We put a fair amount of thought into how to handle the "Record Status" field.  In some ways, it seemed logical to filter the dataset to only include "Approved" records before modeling; one might reasonably argue that potential inaccurracies and inconsistencies of "In Review" records could skew the data.  At the same time, "In Review" records account for nearly 25% of the dataset, and omitting them might skew model performance as much as or more than keeping them in.  Ultimately, we chose to include both "Approved" and "In Review" records and filtering out the small quantity of entries that had some other value for "Record Status."
 - Feature selection also took some deliberation.  As we derived some new columns in our initial examinations (ex. filing entries as either "Plant" or "Animal"), we exercised caution in which fields were ultimately used in building models in order to provide the algorithms with balanced data (or at least as balanced as possible, given the aforementioned considerations and caveats.)
+
+## Data Modeling
+
+### Nativeness - Animals
+
+Guiding Question: Native organisms are vital for maintaining biodiversity. Can we use machine learning and other analytical techniques to better understand current “nativeness” in the parks? 
+
+Possible labels for "Nativeness" variable: Native; Non-native; Unknown
+
+Modeling techniques used:
+- Logistic Regression - as the possible labels are textual and not numerical, this is a classification problem, so Logistic is the appropriate regression algorithm (vs. linear regression) 
+- Decision Tree
+- Keras Neural Network
+
+Evaluation metrics:
+- Logistic Regression accuracy score: 0.901
+- Decision Tree accuracy score: 0.903
+- Keras Neural Network best accuracy score after 150 epochs: 0.934
+
+### Nativeness - With Plants
+
+After running our initial models to predict "Nativeness," we realized we had preprocessed a little too thoroughly - to the point that plants had been eliminated from the picture!  We reevaluated and altered our cleaning methods to run the models again to see how the inclusion of plant records.
+
+Modeling techniques used:
+- Logistic Regression 
+- Decision Tree
+- Keras Neural Network
+
+Evaluation metrics:
+- Logistic Regression accuracy score: 0.861
+- Decision Tree accuracy score: 0.867
+- Keras Neural Network best accuracy score after 150 epochs: 0.884
+
+### Conservation Status - A/B testing
+
+Guiding Question: Total biodiversity is important, but preserving endangered and threatened species can be a big piece in the conservation puzzle. Can we predict which species may be a conservation priority? 
+
+As we discussed in our considerations and caveats, the "Conservation Status" field is missing values for a significant portion of the dataset, so we decided to run our models twice: once including the entries missing values for the field, and a second time on the subset excluding the value-less entries.
+
+Possible labels for "Conservation Status" variable: Species of Concern; Endangered; Under Review; Threatened; In Recovery; Proposed Endangered; Proposed Threatened; None_given (manually encoded for entries missing "Conservation Status" value)
+
+Modeling techniques used:
+- Logistic Regression 
+- Decision Tree
+- Keras Neural Network
+
+Evaluation metrics:
+- Logistic Regression accuracy score, model a: 0.955
+- Logistic Regression accuracy score, model b: 0.860
+- Decision Tree accuracy score, model a: 0.959
+- Decision Tree accuracy score, model b: 0.876
+- Keras Neural Network best accuracy score after 150 epochs, model a: 0.964
+- Keras Neural Network best accuracy score after 150 epochs, model b: 0.938
+
+## Tying It Together
+We can reasonably predict conservation status and abundance used supervised learning models 
+- These models show decent reproducibility and, due to the thousands of species present and analyzed, are less likely to have overfitting as a concern
+- Can use cross-validation to ensure no overfitting/underfitting
+
+We can use supervised learning models to cluster the parks into groups -- may be helpful as an intermediate step in future work
+
+We can reasonably predict biodiversity of a park or parcel of land using land size, location, and number of observed families
+
+Abundance and protected status don't necessarily correlate with each other or our measures of biodiversity; this may be a place for future efforts
+
+## Future Directions
+We could obtain climatological and biome classification data to improve our biodiversity models (at both species and park level)
+
+If a more complete dataset could be obtained, how would this alter our results (if at all)?
+- Only c. 4% of dataset had a value for "Conservation Status"
+
+Could the amount of historical conservation funding/research for each park be somehow quantified, allowing us to re-weight data based on imbalances?
+- Ex. Are there actually six times the number of species present in the Smokies and Redwoods vs. Arches and the Petrified Forest?  Or are such drastic differences due to more research having been conducted in the former parks over the years?
+
+Is it possible to discern how many (or what % of) species in each park may be omitted from this dataset out of conservation concerns?  How much do these omissions skew the data we worked with?
+- Per Kaggle description: “All park species records are available to the public on the National Park Species portal; exceptions are made for sensitive, threatened, or endangered species when widespread distribution of information could pose a risk to the species in the park.”
